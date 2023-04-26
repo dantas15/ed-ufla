@@ -44,7 +44,10 @@ radio::radio(int capacidade) {
 }
 
 radio::radio(const radio& nRadio) {
-	#warning Implementar construtor de copia
+	capacidadeMaxima = nRadio.capacidadeMaxima;
+	quantidadeDeItens = nRadio.quantidadeDeItens;
+	listaDeMusicas = new musica[capacidadeMaxima];
+	copy (nRadio.listaDeMusicas, nRadio.listaDeMusicas+nRadio.capacidadeMaxima, listaDeMusicas);
 }
 
 radio::~radio() {
@@ -76,7 +79,16 @@ bool radio::buscarradio(const string& nome, musica& ummusica) {
 }
 
 void radio::redimensionarCapacidade() {
-	#warning Implementar esta funcao
+	int novaCapacidade = capacidadeMaxima+2;
+
+	musica *arrAux = new musica[novaCapacidade];
+	
+	copy (listaDeMusicas, listaDeMusicas+capacidadeMaxima, arrAux);
+	capacidadeMaxima = novaCapacidade;
+
+	delete [] listaDeMusicas;
+	
+	listaDeMusicas = arrAux;
 }
 
 void verificarAsMaisPedidas(radio umradio, int dias) {
