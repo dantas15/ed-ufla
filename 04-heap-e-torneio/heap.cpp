@@ -50,34 +50,57 @@ public:
 };
 
 MaxHeap::MaxHeap(int cap) {
-
+    capacidade = cap;
+    tamanho = 0;
+    heap = new dado[capacidade];
 }
 
 MaxHeap::~MaxHeap() {
-   
+    delete[] heap;
 }
 
 int MaxHeap::pai(int i) {
-
+    return (i - 1) / 2;
 }
-    
+
 int MaxHeap::esquerdo(int i) {
-
+    return 2 * i + 1;
 }
-    
+
 int MaxHeap::direito(int i) {
-
+    return 2 * i + 2;
 }
-    
-void MaxHeap::corrigeDescendo(int i) {
 
+void MaxHeap::corrigeDescendo(int i) {
+    int esq = esquerdo(i);
+    int dir = direito(i);
+    int maior = i;
+
+    if (esq < tamanho && heap[esq] > heap[maior])
+        maior = esq;
+
+    if (dir < tamanho && heap[dir] > heap[maior])
+        maior = dir;
+
+    if (maior != i) {
+        swap(heap[i], heap[maior]);
+        corrigeDescendo(maior);
+    }
 }
 
 void MaxHeap::corrigeSubindo(int i) {
+    int p = pai(i);
 
+    if (i > 0 && heap[i] > heap[p]) {
+        swap(heap[i], heap[p]);
+        corrigeSubindo(p);
+    }
 }
         
 void MaxHeap::imprime() {
+    if(tamanho == 0) {
+        throw runtime_error("Heap vazia!");
+    }
     for (int i=0; i<tamanho; i++) {
         cout << heap[i] << " ";
     }
@@ -85,12 +108,25 @@ void MaxHeap::imprime() {
 }
 
 dado MaxHeap::retiraRaiz() {
+    if (tamanho == 0)
+        throw runtime_error("Erro ao retirar raiz");
 
+    dado raiz = heap[0];
+    heap[0] = heap[tamanho - 1];
+    tamanho--;
+    corrigeDescendo(0);
+
+    return raiz;
 }
 
+void MaxHeap::insere(dado d) {
+    if (tamanho == capacidade)
+        throw runtime_error("Heap cheio");
 
-void MaxHeap::insere(dado d){
-
+    tamanho++;
+    int i = tamanho - 1;
+    heap[i] = d;
+    corrigeSubindo(i);
 }
 
 
@@ -129,3 +165,24 @@ int main() {
     cout << endl;
     return 0;
 }
+
+/* TESTES (ENTRADA E SAÍDA ESPERADOS)
+10
+r
+Erro ao retirar raiz
+p
+Heap vazia!
+i livingroom r 35 58 5
+i tvroom t 18 28 8
+i kitchen c 180 200 1
+i bedroom1 x 99 90 2
+i bedroom2 x 33 50 5
+i bedroom3 v 56 80 8
+p
+[kitchen/c/180/200/1] [bedroom1/x/99/90/2] [bedroom3/v/56/80/8] [tvroom/t/18/28/8] [bedroom2/x/33/50/5] [livingroom/r/35/58/5] 
+r
+kitchen
+p
+[bedroom1/x/99/90/2] [livingroom/r/35/58/5] [bedroom3/v/56/80/8] [tvroom/t/18/28/8] [bedroom2/x/33/50/5] 
+f
+*/
