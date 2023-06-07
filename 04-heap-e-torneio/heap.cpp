@@ -27,7 +27,7 @@ bool operator<(dado d1, dado d2) {
 }
 
 ostream& operator<<(ostream& output,const dado& d) {
-    output << "[" << d.nomeTarefa << "/" << d.tipoTarefa << "/" << d.energiaGasta << "/" << d.tempoEstimado << "/" << d.prioridade <<"]"; 
+    output << "[" << d.nomeTarefa << "/" << d.tipoTarefa << "/" << d.energiaGasta << "/" << d.tempoEstimado << "/" << d.prioridade <<"] "; 
     return output;
 }
 
@@ -52,7 +52,7 @@ public:
 MaxHeap::MaxHeap(int cap) {
     capacidade = cap;
     tamanho = 0;
-    heap = new dado[capacidade];
+    heap = new dado[cap];
 }
 
 MaxHeap::~MaxHeap() {
@@ -76,13 +76,15 @@ void MaxHeap::corrigeDescendo(int i) {
     int dir = direito(i);
     int maior = i;
 
-    if (esq < tamanho && heap[esq] > heap[maior])
+    if ((esq < tamanho) && (heap[esq].energiaGasta > heap[maior].energiaGasta)) {
         maior = esq;
+    }
 
-    if (dir < tamanho && heap[dir] > heap[maior])
+    if ((dir < tamanho) && (heap[dir].energiaGasta > heap[maior].energiaGasta)) {
         maior = dir;
+    }
 
-    if (maior != i) {
+    if(maior != i) {
         swap(heap[i], heap[maior]);
         corrigeDescendo(maior);
     }
@@ -90,8 +92,7 @@ void MaxHeap::corrigeDescendo(int i) {
 
 void MaxHeap::corrigeSubindo(int i) {
     int p = pai(i);
-
-    if (i > 0 && heap[i] > heap[p]) {
+    if(heap[i].energiaGasta > heap[p].energiaGasta) {
         swap(heap[i], heap[p]);
         corrigeSubindo(p);
     }
@@ -102,31 +103,30 @@ void MaxHeap::imprime() {
         throw runtime_error("Heap vazia!");
     }
     for (int i=0; i<tamanho; i++) {
-        cout << heap[i] << " ";
+        operator<<(cout, heap[i]);
     }
     cout << endl;
 }
 
 dado MaxHeap::retiraRaiz() {
-    if (tamanho == 0)
+    if(tamanho == 0) {
         throw runtime_error("Erro ao retirar raiz");
-
-    dado raiz = heap[0];
-    heap[0] = heap[tamanho - 1];
+    }
+    dado aux = heap[0];
+    swap(heap[0], heap[tamanho-1]);
     tamanho--;
     corrigeDescendo(0);
-
-    return raiz;
+    return aux;
 }
 
-void MaxHeap::insere(dado d) {
-    if (tamanho == capacidade)
-        throw runtime_error("Heap cheio");
 
+void MaxHeap::insere(dado d){
+    if(tamanho == capacidade) {
+        throw runtime_error("Erro ao inserir");
+    }
+    heap[tamanho] = d; 
+    corrigeSubindo(tamanho);
     tamanho++;
-    int i = tamanho - 1;
-    heap[i] = d;
-    corrigeSubindo(i);
 }
 
 
