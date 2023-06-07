@@ -10,7 +10,7 @@
 
 using namespace std;
 
-struct acaoPrograma{
+struct acaoPrograma {
     int identificador;
     string nomeAcao;
     int tempoExecucao; 
@@ -31,9 +31,9 @@ public:
 
 // construindo dado chamando seu construtor
 noh::noh(acaoPrograma d){
-    acao = d;
-    proximo = NULL;
-    anterior = NULL;
+    this->acao = d;
+    this->proximo = NULL;
+    this->anterior = NULL;
 }
 
 
@@ -64,33 +64,51 @@ public:
 
 // constrói uma lista inicialmente vazia
 listadup::listadup() {
-
+    this->primeiro = NULL;
+    this->ultimo = NULL;
+    this->tamanho = 0;
 }
 
 // construtor de cópia
 listadup::listadup(const listadup& umaLista) {
-    
+    this->primeiro = NULL;
+    this->ultimo = NULL;
+    this->tamanho = 0;
+    noh* aux = umaLista.primeiro;
+    while (aux != NULL) {
+        this->insereNoFim(aux->acao);
+        aux = aux->proximo;
+    }
 }
 
 // destrutor da lista (chama função privada auxiliar)
-listadup::~listadup( ) {
-
+listadup::~listadup() {
+    removeTodos();
 }    
 
 // remove todos os elementos da lista
-void listadup::removeTodos( ) {
-
-}    
+void listadup::removeTodos() {
+    noh* aux = this->primeiro;
+    noh* temp;
+    while (aux != NULL) {
+        temp = aux;
+        aux = aux->proximo;
+        delete temp;
+    }  
+    tamanho = 0;
+    primeiro = NULL;
+    ultimo = NULL;
+}
 
 // sobrecarga do operador de atribuição
 listadup& listadup::operator=(const listadup& umaLista){
     // limpa a lista atual
-    removeTodos();
-     // percorre a lista recebida como parâmetro, copiando os dados
+    this->removeTodos();
+    // percorre a lista recebida como parâmetro, copiando os dados
     noh* aux = umaLista.primeiro;
     
     while (aux != NULL) {
-        insereNoFim(aux->acao);
+        this->insereNoFim(aux->acao);
         aux = aux->proximo;  
     }
     
@@ -99,41 +117,155 @@ listadup& listadup::operator=(const listadup& umaLista){
 
 // insere por no final da lista
 void listadup::insereNoFim(acaoPrograma acao) {
-
+    noh* novo = new noh(acao);
+    if (this->vazia()) {
+        this->primeiro = novo;
+        this->ultimo = novo;
+    } else {
+        novo->anterior = ultimo;
+        this->ultimo->proximo = novo;
+        this->ultimo = novo;
+    }
+    this->tamanho++;
 }
 
 // insere no início da lista
 void listadup::insereNoInicio(acaoPrograma acao) {
- 
+    noh* novo = new noh(acao);
+    if (this->vazia()) {
+        this->primeiro = novo;
+        this->ultimo = novo;
+    } else {
+        novo->proximo = primeiro;
+        this->primeiro->anterior = novo;
+        this->primeiro = novo;
+    }
+    this->tamanho++;
 }
 
 // insere em uma determinada posição da lista
 void listadup::insereNaPosicao(int posicao, acaoPrograma acao){
-
+    noh* novo = new noh(acao);
+    if ((posicao <= this->tamanho) and (posicao >= 0)) {
+        if (this->vazia()) {
+            this->primeiro = novo;
+            this->ultimo = novo;
+        } else if (posicao == 0) {
+            novo->proximo = this->primeiro;
+            this->primeiro->anterior = novo;
+            this->primeiro = novo;
+        } else if (posicao == this->tamanho) {
+            novo->anterior = this->ultimo;
+            this->ultimo->proximo = novo;
+            this->ultimo = novo;
+        } else {
+            noh* aux = this->primeiro;
+            int posAux = 0;
+            while (posAux < posicao - 1) {
+                aux = aux->proximo;
+                posAux++;
+            }
+            novo->proximo = aux->proximo;
+            novo->anterior = aux;
+            aux->proximo->anterior = novo;
+            aux->proximo = novo;
+        }
+        this->tamanho++;
+    } else {
+        cerr << "Posição Inexistente!" << endl;
+        exit(EXIT_FAILURE);
+    }
 }
                    
 
 int listadup::procura(string valor) {
-
+    noh* aux = this->primeiro;
+    int posAux = 0;
+    while ((aux != NULL) and (aux->acao.nomeAcao != valor)) {
+        posAux++;
+        aux = aux->proximo;
+    }
+    if (aux == NULL) {
+        posAux = -1;
+    }
+    return posAux;
 }
 
 // método básico que *percorre* uma lista, imprimindo seus elementos
 void listadup::imprime() {
-   
+    if(this->vazia()) {
+        throw runtime_error("Lista vazia!");
+    }
+
+    noh* aux = this->primeiro;
+    while (aux != NULL) {
+        cout << "(" << aux->acao.identificador << ", ";
+        cout << aux->acao.nomeAcao << ", ";
+        cout << aux->acao.tempoExecucao << ", ";
+        cout << aux->acao.tempoConsumido << ")";
+        aux = aux->proximo;
+        cout << endl;
+    }
+
+    cout << "IMPRIMINDO REVERSO \n";
+    
+    aux = this->ultimo;
+    while(aux != NULL) {
+        cout << "(" << aux->acao.identificador << ", ";
+        cout << aux->acao.nomeAcao << ", ";
+        cout << aux->acao.tempoExecucao << ", ";
+        cout << aux->acao.tempoConsumido << ")";
+        aux = aux->anterior;
+        cout << endl;
+    }
 }
 
 // verifica se a lista está vazia
 inline bool listadup::vazia() {
-
+    return (primeiro == NULL);
 }
 
 void listadup::removeNoInicio() {
+    if (this->vazia()) {
+        cerr << "Remoção em lista vazia!" << endl;
+        return;
+    }
 
+    noh* aux = this->primeiro;
+
+    if (this->primeiro == this->ultimo) {
+        // Se a lista tiver apenas um elemento
+        this->primeiro = NULL;
+        this->ultimo = NULL;
+    } else {
+        this->primeiro = this->primeiro->proximo;
+        this->primeiro->anterior = NULL;
+    }
+
+    delete aux;
+    this->tamanho--;
 }
 
 
 void listadup::removeNoFim() {
+    if (this->vazia()) {
+        cerr << "Remoção em lista vazia!" << endl;
+        return;
+    }
 
+    noh* aux = this->ultimo;
+
+    if (this->primeiro == this->ultimo) {
+        // Se a lista tiver apenas um elemento
+        this->primeiro = NULL;
+        this->ultimo = NULL;
+    } else {
+        this->ultimo = this->ultimo->anterior;
+        this->ultimo->proximo = NULL;
+    }
+
+    delete aux;
+    this->tamanho--;
 }
 
 
@@ -164,10 +296,13 @@ int main() {
                 case 's': // procurar
                     cin >> nomeEquipe;
                     posicao = minhaLista.procura(nomeEquipe);
-                    if(posicao == -1)
+                    if (minhaLista.vazia()) {
+                        cout << "Lista vazia!" << endl;
+                    } else if(posicao < 0) {
                         cout << "Nao encontrado"<< endl;
-                    else
+                    } else {
                         cout << posicao << endl;
+                    }
                     break;                    
                 case 'r': // remover
                     minhaLista.removeNoInicio();
@@ -183,6 +318,7 @@ int main() {
                     break;
                 default:
                     cerr << "comando inválido\n";
+                    break;
             }
         } catch (runtime_error& e) {
             cout << e.what() << endl;
